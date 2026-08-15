@@ -38,6 +38,7 @@ jobs:
       - name: Run PHP test suite
         run: |
           php tests/test-rules.php
+          php tests/test-validator.php
           php tests/test-parser.php
 
       - name: Verify packaging

@@ -17,6 +17,13 @@ defined( 'ABSPATH' ) || defined( 'CAPO_TEST_SUITE' ) || exit;
 class Parser {
 
 	/**
+	 * Last execution analysis result.
+	 *
+	 * @var array<string, mixed>|null
+	 */
+	public static $last_analysis = null;
+
+	/**
 	 * Reorder the <head> elements in a full HTML document.
 	 *
 	 * @param string $html Full HTML document.
@@ -45,6 +52,9 @@ class Parser {
 		if ( empty( $tokens ) ) {
 			return $html;
 		}
+
+		// Validate head tokens.
+		$warnings = Validator::validate_tokens( $tokens );
 
 		// Perform deterministic stable sort descending by weight.
 		usort(
@@ -76,12 +86,24 @@ class Parser {
 
 		$elapsed_ms = round( ( microtime( true ) - $start_time ) * 1000, 2 );
 
+		// Record analysis.
+		self::$last_analysis = array(
+			'element_count' => $element_count,
+			'elapsed_ms'    => $elapsed_ms,
+			'warnings'      => $warnings,
+			'tokens'        => $tokens,
+		);
+
 		// Build debug/comment header if requested.
 		$debug_comment = '';
 		$include_debug = isset( $options['debug_comment'] ) ? (bool) $options['debug_comment'] : true;
 		if ( $include_debug ) {
+			$warning_suffix = '';
+			if ( ! empty( $warnings ) ) {
+				$warning_suffix = sprintf( ' | %d warning%s', count( $warnings ), count( $warnings ) === 1 ? '' : 's' );
+			}
 			$debug_comment = "\t<!-- Reordered by Capo (https://rviscomi.github.io/capo.js/) [" .
-				$element_count . ' elements optimized in ' . $elapsed_ms . "ms] -->\n";
+				$element_count . ' elements optimized in ' . $elapsed_ms . 'ms' . $warning_suffix . "] -->\n";
 		}
 
 		$new_head_content = "\n" . $debug_comment . implode( "\n", $reordered_chunks ) . "\n";

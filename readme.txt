@@ -5,7 +5,7 @@ Tags: performance, speed, head, seo, optimization, web-vitals
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 1.0.0
+Stable tag: 0.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,7 +43,7 @@ Capo organizes elements into 11 strict priority tiers (Weight 10 down to 0):
 * **Deterministic Stable Sort:** Equal-weight elements retain their exact relative order, preserving CSS cascade specificity and JavaScript dependencies.
 * **Full Cache Compatibility:** Works seamlessly with WP Super Cache, W3 Total Cache, WP Rocket, LiteSpeed Cache, and Cloudflare.
 * **Safe HTML Tokenizer:** Respects HTML comments, conditional comments (`<!--[if ...]>`), CDATA blocks, and inline script markup.
-* **Site Health Integration:** Adds an optimization diagnostic check under **Tools > Site Health**.
+* **Site Health & Admin Diagnostics:** Real-time `<head>` hygiene warnings and diagnostic status in Tools > Site Health and Admin Toolbar.
 * **Testing & Bypass Mode:** Append `?capo=off` to any frontend URL to inspect the un-reordered head.
 
 == Installation ==
@@ -70,13 +70,14 @@ You can view any page with `?capo=off` appended to the URL to bypass reordering 
 
 == Changelog ==
 
-= 1.0.0 =
-* Initial release.
+= 0.1.0 =
+* Initial public beta release.
 * Output buffering engine for automatic `<head>` reordering.
-* 1:1 parity with `@rviscomi/capo.js` rules engine.
-* Site Health integration and bypass mode (`?capo=off`).
+* 1:1 parity with `@rviscomi/capo.js` rules and validation engine.
+* Admin Bar live page diagnostics and Site Health hygiene integration.
+* Bypass mode (`?capo=off`).
 
 == Upgrade Notice ==
 
-= 1.0.0 =
-Initial release of Capo for WordPress.
+= 0.1.0 =
+Initial development beta release of Capo for WordPress.

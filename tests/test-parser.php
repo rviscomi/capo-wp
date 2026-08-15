@@ -11,6 +11,7 @@
 define( 'CAPO_TEST_SUITE', true );
 
 require_once __DIR__ . '/../includes/class-capo-rules.php';
+require_once __DIR__ . '/../includes/class-capo-validator.php';
 require_once __DIR__ . '/../includes/class-capo-parser.php';
 
 use Capo\Parser;

@@ -41,6 +41,7 @@ class Admin {
 		add_action( 'admin_menu', array( $this, 'add_options_page' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
 		add_filter( 'plugin_action_links_' . CAPO_PLUGIN_BASENAME, array( $this, 'add_action_links' ) );
+		add_action( 'admin_bar_menu', array( $this, 'add_admin_bar_node' ), 100 );
 	}
 
 	/**
@@ -193,4 +194,74 @@ class Admin {
 		</div>
 		<?php
 	}
+
+	/**
+	 * Add diagnostic node to the WordPress Admin Bar for administrators.
+	 *
+	 * @param \WP_Admin_Bar $wp_admin_bar Admin bar instance.
+	 */
+	public function add_admin_bar_node( $wp_admin_bar ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		$analysis = Parser::$last_analysis;
+		if ( ! $analysis ) {
+			return;
+		}
+
+		$warning_count = count( $analysis['warnings'] );
+		$has_warnings  = $warning_count > 0;
+
+		$icon  = $has_warnings ? '⚠️' : '⚡';
+		$title = sprintf( '%s Capo (%d elements)', $icon, $analysis['element_count'] );
+		if ( $has_warnings ) {
+			$title .= sprintf( ' [%d Warning%s]', $warning_count, $warning_count === 1 ? '' : 's' );
+		}
+
+		$wp_admin_bar->add_node(
+			array(
+				'id'    => 'capo-diagnostics',
+				'title' => esc_html( $title ),
+				'href'  => admin_url( 'options-general.php?page=capo' ),
+				'meta'  => array(
+					'title' => esc_attr__( 'Capo Head Diagnostics & Optimization', 'capo' ),
+				),
+			)
+		);
+
+		// Submenu: Timing metric.
+		$wp_admin_bar->add_node(
+			array(
+				'id'     => 'capo-metrics',
+				'parent' => 'capo-diagnostics',
+				'title'  => sprintf( '⚡ Reordered in %sms', $analysis['elapsed_ms'] ),
+				'href'   => admin_url( 'options-general.php?page=capo' ),
+			)
+		);
+
+		// Submenu: Warnings / Hygiene status.
+		if ( $has_warnings ) {
+			foreach ( $analysis['warnings'] as $idx => $w ) {
+				$wp_admin_bar->add_node(
+					array(
+						'id'     => 'capo-warning-' . $idx,
+						'parent' => 'capo-diagnostics',
+						'title'  => sprintf( '⚠️ %s', esc_html( $w['warning'] ) ),
+						'href'   => admin_url( 'options-general.php?page=capo' ),
+					)
+				);
+			}
+		} else {
+			$wp_admin_bar->add_node(
+				array(
+					'id'     => 'capo-status-good',
+					'parent' => 'capo-diagnostics',
+					'title'  => '✅ No <head> hygiene issues detected',
+					'href'   => admin_url( 'options-general.php?page=capo' ),
+				)
+			);
+		}
+	}
 }
+

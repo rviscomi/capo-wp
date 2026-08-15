@@ -20,6 +20,7 @@
   "scripts": {
     "test": [
       "php tests/test-rules.php",
+      "php tests/test-validator.php",
       "php tests/test-parser.php"
     ]
   }
