@@ -49,12 +49,12 @@ class Site_Health {
 	 */
 	public function register_tests( $tests ) {
 		$tests['direct']['capo_head_optimization'] = array(
-			'label' => __( 'HTML <head> Optimization (Capo)', 'capo' ),
+			'label' => __( 'HTML <head> Optimization (Capo)', 'capo-html-head-optimizer' ),
 			'test'  => array( $this, 'test_capo_status' ),
 		);
 
 		$tests['direct']['capo_head_hygiene'] = array(
-			'label' => __( 'HTML Head Hygiene & Validation (Capo)', 'capo' ),
+			'label' => __( 'HTML Head Hygiene & Validation (Capo)', 'capo-html-head-optimizer' ),
 			'test'  => array( $this, 'test_capo_hygiene' ),
 		);
 
@@ -100,35 +100,35 @@ class Site_Health {
 
 		if ( ! $is_enabled ) {
 			return array(
-				'label'       => __( 'Capo head optimization is disabled', 'capo' ),
+				'label'       => __( 'Capo head optimization is disabled', 'capo-html-head-optimizer' ),
 				'status'      => 'recommended',
 				'badge'       => array(
-					'label' => __( 'Performance', 'capo' ),
+					'label' => __( 'Performance', 'capo-html-head-optimizer' ),
 					'color' => 'orange',
 				),
 				'description' => sprintf(
 					'<p>%s</p>',
-					__( 'Capo is currently disabled in your settings. Enabling Capo reorders critical head elements to improve First Contentful Paint (FCP) and Largest Contentful Paint (LCP).', 'capo' )
+					__( 'Capo is currently disabled in your settings. Enabling Capo reorders critical head elements to improve First Contentful Paint (FCP) and Largest Contentful Paint (LCP).', 'capo-html-head-optimizer' )
 				),
 				'actions'     => sprintf(
 					'<p><a class="button button-primary" href="%s">%s</a></p>',
 					esc_url( admin_url( 'options-general.php?page=capo' ) ),
-					__( 'Enable Capo in Settings', 'capo' )
+					__( 'Enable Capo in Settings', 'capo-html-head-optimizer' )
 				),
 				'test'        => 'capo_head_optimization',
 			);
 		}
 
 		return array(
-			'label'       => __( 'HTML <head> is optimized by Capo', 'capo' ),
+			'label'       => __( 'HTML <head> is optimized by Capo', 'capo-html-head-optimizer' ),
 			'status'      => 'good',
 			'badge'       => array(
-				'label' => __( 'Performance', 'capo' ),
+				'label' => __( 'Performance', 'capo-html-head-optimizer' ),
 				'color' => 'blue',
 			),
 			'description' => sprintf(
 				'<p>%s</p>',
-				__( 'Capo is actively optimizing the order of your HTML &lt;head&gt; tags to ensure fast resource discovery, early network connections, and unblocked rendering.', 'capo' )
+				__( 'Capo is actively optimizing the order of your HTML &lt;head&gt; tags to ensure fast resource discovery, early network connections, and unblocked rendering.', 'capo-html-head-optimizer' )
 			),
 			'actions'     => '',
 			'test'        => 'capo_head_optimization',
@@ -151,15 +151,15 @@ class Site_Health {
 
 		if ( is_wp_error( $response ) ) {
 			return array(
-				'label'       => __( 'Could not verify <head> hygiene via loopback', 'capo' ),
+				'label'       => __( 'Could not verify <head> hygiene via loopback', 'capo-html-head-optimizer' ),
 				'status'      => 'good',
 				'badge'       => array(
-					'label' => __( 'Performance', 'capo' ),
+					'label' => __( 'Performance', 'capo-html-head-optimizer' ),
 					'color' => 'blue',
 				),
 				'description' => sprintf(
 					'<p>%s</p>',
-					__( 'Loopback request to the homepage timed out or failed. You can test your site directly using the live demo link in Capo Settings.', 'capo' )
+					__( 'Loopback request to the homepage timed out or failed. You can test your site directly using the live demo link in Capo Settings.', 'capo-html-head-optimizer' )
 				),
 				'actions'     => '',
 				'test'        => 'capo_head_hygiene',
@@ -169,13 +169,13 @@ class Site_Health {
 		$html = wp_remote_retrieve_body( $response );
 		if ( empty( $html ) || ! preg_match( '/<head(\s[^>]*)?>(.*?)<\/head>/is', $html, $matches ) ) {
 			return array(
-				'label'       => __( 'No HTML <head> section found to validate', 'capo' ),
+				'label'       => __( 'No HTML <head> section found to validate', 'capo-html-head-optimizer' ),
 				'status'      => 'good',
 				'badge'       => array(
-					'label' => __( 'Performance', 'capo' ),
+					'label' => __( 'Performance', 'capo-html-head-optimizer' ),
 					'color' => 'blue',
 				),
-				'description' => '<p>' . __( 'The homepage did not return a valid HTML &lt;head&gt; section.', 'capo' ) . '</p>',
+				'description' => '<p>' . __( 'The homepage did not return a valid HTML &lt;head&gt; section.', 'capo-html-head-optimizer' ) . '</p>',
 				'actions'     => '',
 				'test'        => 'capo_head_hygiene',
 			);
@@ -235,39 +235,39 @@ class Site_Health {
 			return array(
 				'label'       => sprintf(
 					/* translators: %d: number of validation warnings */
-					_n( 'Capo detected %d <head> hygiene issue on your homepage', 'Capo detected %d <head> hygiene issues on your homepage', count( $warnings ), 'capo' ),
+					_n( 'Capo detected %d <head> hygiene issue on your homepage', 'Capo detected %d <head> hygiene issues on your homepage', count( $warnings ), 'capo-html-head-optimizer' ),
 					count( $warnings )
 				),
 				'status'      => 'recommended',
 				'badge'       => array(
-					'label' => __( 'Performance', 'capo' ),
+					'label' => __( 'Performance', 'capo-html-head-optimizer' ),
 					'color' => 'orange',
 				),
 				'description' => sprintf(
 					'<p>%s</p><ul style="list-style:disc;margin-left:20px;">%s</ul><p>%s</p>',
-					__( 'The following issues were detected in your &lt;head&gt; markup, which may impact browser rendering speed, SEO, or layout stability:', 'capo' ),
+					__( 'The following issues were detected in your &lt;head&gt; markup, which may impact browser rendering speed, SEO, or layout stability:', 'capo-html-head-optimizer' ),
 					$warning_items,
-					__( 'Check your active theme templates, custom code snippets, or header injection settings to remove or fix these offending elements.', 'capo' )
+					__( 'Check your active theme templates, custom code snippets, or header injection settings to remove or fix these offending elements.', 'capo-html-head-optimizer' )
 				),
 				'actions'     => sprintf(
 					'<p><a class="button button-primary" href="%s">%s</a></p>',
 					esc_url( admin_url( 'options-general.php?page=capo' ) ),
-					__( 'Capo Settings', 'capo' )
+					__( 'Capo Settings', 'capo-html-head-optimizer' )
 				),
 				'test'        => 'capo_head_hygiene',
 			);
 		}
 
 		return array(
-			'label'       => __( 'No HTML <head> hygiene issues detected', 'capo' ),
+			'label'       => __( 'No HTML <head> hygiene issues detected', 'capo-html-head-optimizer' ),
 			'status'      => 'good',
 			'badge'       => array(
-				'label' => __( 'Performance', 'capo' ),
+				'label' => __( 'Performance', 'capo-html-head-optimizer' ),
 				'color' => 'blue',
 			),
 			'description' => sprintf(
 				'<p>%s</p>',
-				__( 'Your &lt;head&gt; markup is clean! All critical tags (single &lt;title&gt;, valid &lt;meta viewport&gt;, and resource preloads) adhere to web performance best practices.', 'capo' )
+				__( 'Your &lt;head&gt; markup is clean! All critical tags (single &lt;title&gt;, valid &lt;meta viewport&gt;, and resource preloads) adhere to web performance best practices.', 'capo-html-head-optimizer' )
 			),
 			'actions'     => '',
 			'test'        => 'capo_head_hygiene',

@@ -10,7 +10,7 @@
  * Author URI:        https://rviscomi.dev/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       capo
+ * Text Domain:       capo-html-head-optimizer
  *
  * @package Capo
  */
