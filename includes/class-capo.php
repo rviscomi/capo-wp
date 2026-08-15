@@ -42,10 +42,8 @@ class Plugin {
 		// Register buffer handler on frontend template_redirect.
 		add_action( 'template_redirect', array( $this, 'maybe_start_buffer' ), 1 );
 
-		// Admin settings & Site Health.
-		if ( is_admin() ) {
-			Admin::instance()->init();
-		}
+		// Admin settings, Admin Toolbar, and Site Health.
+		Admin::instance()->init();
 		Site_Health::instance()->init();
 	}
 
@@ -80,7 +78,13 @@ class Plugin {
 			'debug_comment' => (bool) get_option( 'capo_debug_comment', 1 ),
 		);
 
-		return Parser::reorder_head( $html, $options );
+		$html = Parser::reorder_head( $html, $options );
+
+		if ( Parser::$last_analysis && is_admin_bar_showing() && current_user_can( 'manage_options' ) ) {
+			$html = Admin::inject_admin_bar_html( $html, Parser::$last_analysis );
+		}
+
+		return $html;
 	}
 
 	/**

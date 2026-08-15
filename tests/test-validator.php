@@ -108,6 +108,14 @@ $warnings = Capo\Validator::validate_head( $unnecessary_preload_head );
 $unnec_rules = array_filter( $warnings, function( $w ) { return $w['rule_id'] === 'no-unnecessary-preload'; } );
 assert_test( count( $unnec_rules ) === 1, 'Unnecessary preload triggers no-unnecessary-preload' );
 
+// Test 11: Expired Origin Trial
+$expired_ot_head = '<title>Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="origin-trial" content="AuNyVoVDAnYrBa2cL89WmgDSi1Os1UAt4SmcY1vXSJKDlIlBNfD4SEpIfg3LNDexEWv6N2kHnJ17MT4cVmRhQgIAAABueyJvcmlnaW4iOiJodHRwczovL3J2aXNjb21pLmdpdGh1Yi5pbzo0NDMiLCJmZWF0dXJlIjoiQmFja0ZvcndhcmRDYWNoZU5vdFJlc3RvcmVkUmVhc29ucyIsImV4cGlyeSI6MTY5MTUzOTE5OX0=">';
+$warnings = Capo\Validator::validate_head( $expired_ot_head );
+$ot_rules = array_filter( $warnings, function( $w ) { return $w['rule_id'] === 'no-invalid-origin-trial'; } );
+assert_test( count( $ot_rules ) >= 1, 'Expired origin trial triggers no-invalid-origin-trial' );
+
 echo "\nValidator Results: $passed passed, $failed failed\n";
 
 if ( $failed > 0 ) {

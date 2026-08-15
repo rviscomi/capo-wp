@@ -189,6 +189,17 @@ class Validator {
 					}
 				}
 			}
+
+			// Check for Origin Trial tokens.
+			if ( 'meta' === $tag_name ) {
+				$http_equiv = isset( $attrs['http-equiv'] ) ? strtolower( trim( $attrs['http-equiv'] ) ) : '';
+				if ( 'origin-trial' === $http_equiv ) {
+					$ot_warnings = self::validate_origin_trial( $element );
+					foreach ( $ot_warnings as $ot_w ) {
+						$warnings[] = $ot_w;
+					}
+				}
+			}
 		}
 
 		return $warnings;
@@ -302,5 +313,118 @@ class Validator {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Validate an Origin Trial meta element token.
+	 *
+	 * @param array<string, mixed> $element Origin trial meta element.
+	 * @param string|null          $page_origin Optional target origin.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function validate_origin_trial( array $element, $page_origin = null ) {
+		$warnings = array();
+		$attrs    = $element['attrs'];
+
+		if ( ! isset( $attrs['content'] ) || '' === trim( $attrs['content'] ) ) {
+			$warnings[] = array(
+				'rule_id'      => 'no-invalid-origin-trial',
+				'severity'     => 'warning',
+				'warning'      => 'Invalid origin trial token: invalid token',
+				'element_html' => $element['raw_html'],
+			);
+			return $warnings;
+		}
+
+		$token   = trim( $attrs['content'] );
+		$payload = self::decode_origin_trial_token( $token );
+
+		if ( ! $payload ) {
+			$warnings[] = array(
+				'rule_id'      => 'no-invalid-origin-trial',
+				'severity'     => 'warning',
+				'warning'      => 'Invalid origin trial token: invalid token',
+				'element_html' => $element['raw_html'],
+			);
+			return $warnings;
+		}
+
+		if ( isset( $payload['expiry'] ) && $payload['expiry'] < time() ) {
+			$warnings[] = array(
+				'rule_id'      => 'no-invalid-origin-trial',
+				'severity'     => 'warning',
+				'warning'      => 'Invalid origin trial token: expired',
+				'element_html' => $element['raw_html'],
+				'payload'      => $payload,
+			);
+		}
+
+		$target_origin = $page_origin;
+		if ( ! $target_origin && function_exists( 'home_url' ) ) {
+			$target_origin = home_url( '/' );
+		}
+
+		if ( $target_origin && isset( $payload['origin'] ) ) {
+			$target_parsed = parse_url( $target_origin );
+			$token_parsed  = parse_url( $payload['origin'] );
+
+			$target_host = isset( $target_parsed['host'] ) ? strtolower( $target_parsed['host'] ) : '';
+			$token_host  = isset( $token_parsed['host'] ) ? strtolower( $token_parsed['host'] ) : '';
+
+			if ( $target_host && $token_host && $target_host !== $token_host ) {
+				$is_subdomain = false;
+				if ( strlen( $target_host ) > strlen( $token_host ) && str_ends_with( $target_host, '.' . $token_host ) ) {
+					$is_subdomain = true;
+				}
+
+				if ( $is_subdomain && empty( $payload['isSubdomain'] ) ) {
+					$warnings[] = array(
+						'rule_id'      => 'no-invalid-origin-trial',
+						'severity'     => 'warning',
+						'warning'      => 'Invalid origin trial token: invalid subdomain',
+						'element_html' => $element['raw_html'],
+						'payload'      => $payload,
+					);
+				} elseif ( ! $is_subdomain && empty( $payload['isThirdParty'] ) ) {
+					$warnings[] = array(
+						'rule_id'      => 'no-invalid-origin-trial',
+						'severity'     => 'warning',
+						'warning'      => 'Invalid origin trial token: invalid third-party origin',
+						'element_html' => $element['raw_html'],
+						'payload'      => $payload,
+					);
+				}
+			}
+		}
+
+		return $warnings;
+	}
+
+	/**
+	 * Decode binary Origin Trial token payload.
+	 *
+	 * @param string $token Base64 encoded token.
+	 * @return array<string, mixed>|null
+	 */
+	public static function decode_origin_trial_token( $token ) {
+		$raw = base64_decode( $token, true );
+		if ( false === $raw || strlen( $raw ) < 69 ) {
+			return null;
+		}
+
+		$unpacked = unpack( 'Nlength', substr( $raw, 65, 4 ) );
+		if ( ! $unpacked || ! isset( $unpacked['length'] ) ) {
+			return null;
+		}
+
+		$length = $unpacked['length'];
+		if ( strlen( $raw ) < 69 + $length ) {
+			return null;
+		}
+
+		$json    = substr( $raw, 69, $length );
+		$payload = json_decode( $json, true );
+
+		return is_array( $payload ) ? $payload : null;
 	}
 }

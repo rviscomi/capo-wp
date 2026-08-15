@@ -196,7 +196,11 @@ class Admin {
 	}
 
 	/**
-	 * Add diagnostic node to the WordPress Admin Bar for administrators.
+	 * Register the Capo diagnostic node with the WordPress Toolbar.
+	 *
+	 * Registers the initial Toolbar node during `admin_bar_menu`. Its contents
+	 * and dropdown items are dynamically populated with real-time execution
+	 * analysis by `inject_admin_bar_html()` when the output buffer completes.
 	 *
 	 * @param \WP_Admin_Bar $wp_admin_bar Admin bar instance.
 	 */
@@ -205,63 +209,76 @@ class Admin {
 			return;
 		}
 
-		$analysis = Parser::$last_analysis;
-		if ( ! $analysis ) {
-			return;
+		$wp_admin_bar->add_node(
+			array(
+				'id'    => 'capo-diagnostics',
+				'title' => '<span class="ab-icon dashicons-dashboard" style="top:2px;"></span><span class="ab-label">Capo</span>',
+				'href'  => admin_url( 'options-general.php?page=capo' ),
+				'meta'  => array(
+					'title' => esc_attr__( 'Capo Head Diagnostics & Optimization', 'capo' ),
+					'class' => 'menupop',
+				),
+			)
+		);
+	}
+
+	/**
+	 * Inject real-time analysis, metrics, and warnings into the Admin Toolbar HTML.
+	 *
+	 * @param string               $html     Full HTML page buffer.
+	 * @param array<string, mixed> $analysis Last Capo execution analysis.
+	 * @return string Modified HTML with populated Admin Bar node.
+	 */
+	public static function inject_admin_bar_html( $html, array $analysis ) {
+		if ( empty( $html ) || false === strpos( $html, 'wp-admin-bar-capo-diagnostics' ) ) {
+			return $html;
 		}
 
 		$warning_count = count( $analysis['warnings'] );
 		$has_warnings  = $warning_count > 0;
 
-		$icon  = $has_warnings ? '⚠️' : '⚡';
-		$title = sprintf( '%s Capo (%d elements)', $icon, $analysis['element_count'] );
 		if ( $has_warnings ) {
-			$title .= sprintf( ' [%d Warning%s]', $warning_count, $warning_count === 1 ? '' : 's' );
+			$title_text = sprintf( '⚠️ Capo (%d)', $warning_count );
+			$main_url   = admin_url( 'site-health.php' );
+		} else {
+			$title_text = '⚡ Capo';
+			$main_url   = admin_url( 'options-general.php?page=capo' );
 		}
 
-		$wp_admin_bar->add_node(
-			array(
-				'id'    => 'capo-diagnostics',
-				'title' => esc_html( $title ),
-				'href'  => admin_url( 'options-general.php?page=capo' ),
-				'meta'  => array(
-					'title' => esc_attr__( 'Capo Head Diagnostics & Optimization', 'capo' ),
-				),
-			)
+		$submenu_items = '';
+		$submenu_items .= sprintf(
+			'<li role="group" id="wp-admin-bar-capo-metric"><a class="ab-item" role="menuitem" href="%s">⚡ Reordered %d elements in %sms</a></li>',
+			esc_url( admin_url( 'options-general.php?page=capo' ) ),
+			intval( $analysis['element_count'] ),
+			esc_html( $analysis['elapsed_ms'] )
 		);
 
-		// Submenu: Timing metric.
-		$wp_admin_bar->add_node(
-			array(
-				'id'     => 'capo-metrics',
-				'parent' => 'capo-diagnostics',
-				'title'  => sprintf( '⚡ Reordered in %sms', $analysis['elapsed_ms'] ),
-				'href'   => admin_url( 'options-general.php?page=capo' ),
-			)
-		);
-
-		// Submenu: Warnings / Hygiene status.
 		if ( $has_warnings ) {
 			foreach ( $analysis['warnings'] as $idx => $w ) {
-				$wp_admin_bar->add_node(
-					array(
-						'id'     => 'capo-warning-' . $idx,
-						'parent' => 'capo-diagnostics',
-						'title'  => sprintf( '⚠️ %s', esc_html( $w['warning'] ) ),
-						'href'   => admin_url( 'options-general.php?page=capo' ),
-					)
+				$submenu_items .= sprintf(
+					'<li role="group" id="wp-admin-bar-capo-warn-%d"><a class="ab-item" role="menuitem" href="%s" style="white-space:normal;height:auto;line-height:1.4;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.07);"><span style="color:#dba617;font-weight:600;font-size:12px;">⚠️ %s</span><br><span style="color:#f0f0f1;font-size:12px;display:block;margin-top:2px;">%s</span></a></li>',
+					$idx,
+					esc_url( admin_url( 'site-health.php' ) ),
+					esc_html( $w['rule_id'] ),
+					esc_html( $w['warning'] )
 				);
 			}
 		} else {
-			$wp_admin_bar->add_node(
-				array(
-					'id'     => 'capo-status-good',
-					'parent' => 'capo-diagnostics',
-					'title'  => '✅ No <head> hygiene issues detected',
-					'href'   => admin_url( 'options-general.php?page=capo' ),
-				)
+			$submenu_items .= sprintf(
+				'<li role="group" id="wp-admin-bar-capo-good"><a class="ab-item" role="menuitem" href="%s" style="padding:10px 14px;">✅ No &lt;head&gt; hygiene issues detected</a></li>',
+				esc_url( admin_url( 'options-general.php?page=capo' ) )
 			);
 		}
+
+		$node_html = sprintf(
+			'<li role="group" id="wp-admin-bar-capo-diagnostics" class="menupop"><a class="ab-item" role="menuitem" aria-haspopup="true" href="%s">%s</a><div class="ab-sub-wrapper" style="max-height:calc(100vh - 48px);overflow-y:auto;overscroll-behavior:contain;"><ul role="menu" id="wp-admin-bar-capo-diagnostics-default" class="ab-submenu" style="max-height:calc(100vh - 48px);overflow-y:auto;overscroll-behavior:contain;">%s</ul></div></li>',
+			esc_url( $main_url ),
+			esc_html( $title_text ),
+			$submenu_items
+		);
+
+		$pattern = '/<li\s+[^>]*id=[\'"]wp-admin-bar-capo-diagnostics[\'"][^>]*>.*?<\/li>/s';
+		return preg_replace( $pattern, $node_html, $html, 1 );
 	}
 }
 
