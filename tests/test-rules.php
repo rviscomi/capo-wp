@@ -147,6 +147,7 @@ class Capo_Rules_Test {
 		self::assert_weight( '<link rel="dns-prefetch" href="//fonts.googleapis.com">', 1, 'dns-prefetch link' );
 		self::assert_weight( '<link rel="prefetch" href="/next-page.html">', 1, 'prefetch link' );
 		self::assert_weight( '<link rel="prerender" href="/next-page.html">', 1, 'prerender link' );
+		self::assert_weight( '<script type="speculationrules">{"prefetch":[]}</script>', 1, 'speculationrules script' );
 	}
 
 	private static function test_other_detection() {

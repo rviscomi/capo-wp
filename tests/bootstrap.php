@@ -9,7 +9,7 @@
  */
 
 defined( 'ABSPATH' ) || define( 'ABSPATH', dirname( __DIR__ ) . '/' );
-defined( 'CAPO_VERSION' ) || define( 'CAPO_VERSION', '0.1.2' );
+defined( 'CAPO_VERSION' ) || define( 'CAPO_VERSION', '0.1.3' );
 defined( 'CAPO_PLUGIN_FILE' ) || define( 'CAPO_PLUGIN_FILE', dirname( __DIR__ ) . '/capo.php' );
 defined( 'CAPO_PLUGIN_DIR' ) || define( 'CAPO_PLUGIN_DIR', dirname( __DIR__ ) . '/' );
 defined( 'CAPO_PLUGIN_BASENAME' ) || define( 'CAPO_PLUGIN_BASENAME', 'capo/capo.php' );

@@ -267,9 +267,12 @@ ${keywordsList}
 			return false;
 		}
 
-		// JSON or non-executable script data (e.g. application/ld+json, importmap, speculationrules).
-		if ( isset( $attrs['type'] ) && false !== stripos( $attrs['type'], 'json' ) ) {
-			return false;
+		// JSON or non-executable script data (e.g. application/ld+json, speculationrules).
+		if ( isset( $attrs['type'] ) ) {
+			$type = strtolower( trim( $attrs['type'] ) );
+			if ( false !== stripos( $type, 'json' ) || 'speculationrules' === $type ) {
+				return false;
+			}
 		}
 
 		return true;
@@ -348,13 +351,18 @@ ${keywordsList}
 	}
 
 	/**
-	 * Check if element is prefetch, dns-prefetch, or prerender.
+	 * Check if element is prefetch, dns-prefetch, prerender, or speculationrules script.
 	 *
 	 * @param string $tag_name Tag name.
 	 * @param array  $attrs    Element attributes.
 	 * @return bool
 	 */
 	public static function is_prefetch_prerender( $tag_name, array $attrs ) {
+		if ( 'script' === $tag_name ) {
+			$type = isset( $attrs['type'] ) ? strtolower( trim( $attrs['type'] ) ) : '';
+			return 'speculationrules' === $type;
+		}
+
 		if ( 'link' !== $tag_name ) {
 			return false;
 		}

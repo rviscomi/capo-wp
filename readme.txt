@@ -5,7 +5,7 @@ Tags: performance, speed, head, seo, web-vitals
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 7.4
-Stable tag: 0.1.2
+Stable tag: 0.1.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -34,7 +34,7 @@ Capo organizes elements into 11 strict priority tiers (Weight 10 down to 0):
 7. **Weight 4 (Stylesheets & Style Blocks):** `<link rel="stylesheet">`, `<style>` blocks.
 8. **Weight 3 (Preload):** `<link rel="preload">`, `<link rel="modulepreload">`.
 9. **Weight 2 (Defer Script):** `<script src="..." defer>`, `<script src="..." type="module">`.
-10. **Weight 1 (Prefetch / Prerender):** `<link rel="prefetch">`, `<link rel="dns-prefetch">`, `<link rel="prerender">`.
+10. **Weight 1 (Prefetch / Prerender):** `<link rel="prefetch">`, `<link rel="dns-prefetch">`, `<link rel="prerender">`, `<script type="speculationrules">`.
 11. **Weight 0 (Other Metadata):** OpenGraph, Twitter cards, Schema JSON-LD, RSS feeds, favicons, robots metadata.
 
 ### Features
@@ -70,6 +70,15 @@ You can view any page with `?capo=off` appended to the URL to bypass reordering 
 
 == Changelog ==
 
+= 0.1.3 =
+* Added support for Speculation Rules API (`<script type="speculationrules">`) classified as Weight 1 (Prefetch / Prerender) matching `@rviscomi/capo.js` v2.2.1.
+* Enhanced HTML tokenizer and attribute parsing to robustly preserve tags with `>` inside quoted attributes, boolean attributes, and empty string attributes.
+* Added full support for HTML conditional comments (`<!--[if ...]>`) and CDATA sections in `<head>`.
+* Hardened Admin Toolbar diagnostic injection against regex backreference exploits using safe substring replacement.
+* Added pass-by-reference `$analysis` parameter and static accessor/reset methods to Parser for optimized memory lifecycle management.
+* Extended Site Health loopback check request timeout to 10 seconds via dynamic filter.
+* Consolidated test bootstrap harness and added CI matrix testing across PHP 7.4 through 8.3.
+
 = 0.1.2 =
 * Adhered strictly to WordPress.org Plugin Directory guidelines and security standards.
 * Changed debug performance HTML comment to opt-in by default and removed external URLs.
@@ -91,6 +100,9 @@ You can view any page with `?capo=off` appended to the URL to bypass reordering 
 * Site Health integration and bypass mode (`?capo=off`).
 
 == Upgrade Notice ==
+
+= 0.1.3 =
+Adds Speculation Rules API classification, tokenizer robustness for conditional comments/CDATA/quoted attributes, Admin Bar security hardening, and parity with capo.js v2.2.1.
 
 = 0.1.2 =
 Adds full WordPress.org directory compliance, opt-in debug comments, uninstall cleanup, and PHP 7.4 compatibility improvements.
