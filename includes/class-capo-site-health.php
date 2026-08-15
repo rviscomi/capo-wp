@@ -142,10 +142,11 @@ class Site_Health {
 	 */
 	public function test_capo_hygiene() {
 		$audit_url = add_query_arg( 'capo_audit', time(), home_url( '/' ) );
+		$timeout   = (int) apply_filters( 'capo_site_health_loopback_timeout', 10 );
 		$response  = wp_remote_get(
 			$audit_url,
 			array(
-				'timeout' => 5,
+				'timeout' => $timeout,
 			)
 		);
 
@@ -167,7 +168,8 @@ class Site_Health {
 		}
 
 		$html = wp_remote_retrieve_body( $response );
-		if ( empty( $html ) || ! preg_match( '/<head(\s[^>]*)?>(.*?)<\/head>/is', $html, $matches ) ) {
+		$head_pattern = '/<head(?:\s+[^"\'\/>=\s]+(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'=<>`]+))?)*\s*>(?P<head_content>[\s\S]*?)<\/head>/i';
+		if ( empty( $html ) || ! preg_match( $head_pattern, $html, $matches ) ) {
 			return array(
 				'label'       => __( 'No HTML <head> section found to validate', 'capo-head-optimizer' ),
 				'status'      => 'good',
@@ -181,7 +183,7 @@ class Site_Health {
 			);
 		}
 
-		$head_content = $matches[2];
+		$head_content = isset( $matches['head_content'] ) ? $matches['head_content'] : '';
 		$warnings     = Validator::validate_head( $head_content );
 
 		if ( ! empty( $warnings ) ) {
