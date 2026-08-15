@@ -25,6 +25,9 @@ class Capo_Parser_Test {
 		echo "=== Running Capo Parser & Sorter Tests ===\n\n";
 
 		self::test_attribute_parsing();
+		self::test_quoted_attributes_with_greater_than();
+		self::test_conditional_comments_and_cdata();
+		self::test_large_payloads_and_malformed_html();
 		self::test_stable_sorting();
 		self::test_comment_association();
 		self::test_full_head_reordering();
@@ -54,6 +57,88 @@ class Capo_Parser_Test {
 		} else {
 			self::$failed++;
 			echo "❌ FAIL: Boolean attributes failed\n";
+		}
+	}
+
+	private static function test_quoted_attributes_with_greater_than() {
+		echo "\nTesting tags with '>' inside quoted attributes...\n";
+
+		$html = '<meta name="description" content="Click > here & explore > now"><script src="/app.js" data-condition="count > 5" async></script>';
+		$tokens = Parser::tokenize_head( $html );
+
+		if ( count( $tokens ) === 2 &&
+			'Click > here & explore > now' === $tokens[0]['attrs']['content'] &&
+			'count > 5' === $tokens[1]['attrs']['data-condition'] &&
+			7 === $tokens[1]['weight'] ) {
+			self::$passed++;
+			echo "✅ PASS: Quoted attributes containing '>' preserve full content and correct tag boundaries\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Quoted attributes containing '>' failed to tokenize properly\n";
+		}
+	}
+
+	private static function test_conditional_comments_and_cdata() {
+		echo "\nTesting conditional comments and CDATA blocks...\n";
+
+		$html = <<<HTML
+<!DOCTYPE html>
+<html>
+<head>
+	<!--[if lt IE 9]>
+	<script src="html5shiv.js"></script>
+	<![endif]-->
+	<![if !IE]>
+	<link rel="stylesheet" href="modern.css">
+	<![endif]>
+	<![CDATA[
+	console.log("cdata block");
+	]]>
+	<meta charset="utf-8">
+</head>
+<body></body>
+</html>
+HTML;
+
+		$reordered = Parser::reorder_head( $html, array( 'debug_comment' => false ) );
+
+		if ( false !== strpos( $reordered, 'html5shiv.js' ) &&
+			false !== strpos( $reordered, '<![if !IE]>' ) &&
+			false !== strpos( $reordered, '<![CDATA[' ) &&
+			false !== strpos( $reordered, '<meta charset="utf-8">' ) ) {
+			self::$passed++;
+			echo "✅ PASS: Conditional comments and CDATA sections preserved in output\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Conditional comments or CDATA sections lost during reordering\n";
+		}
+	}
+
+	private static function test_large_payloads_and_malformed_html() {
+		echo "\nTesting large payloads and malformed HTML handling...\n";
+
+		// Test 1: Large inline script (100KB)
+		$large_script = '<script>var data = "' . str_repeat( 'a', 100000 ) . '";</script>';
+		$head = '<meta charset="utf-8">' . $large_script;
+		$tokens = Parser::tokenize_head( $head );
+
+		if ( count( $tokens ) === 2 && 5 === $tokens[1]['weight'] ) {
+			self::$passed++;
+			echo "✅ PASS: 100KB inline script tokenized without regex backtracking error\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Large script payload failed tokenization\n";
+		}
+
+		// Test 2: Unclosed/malformed head tags fallback gracefully
+		$malformed_doc = '<html><head>No closing head tag<meta charset="utf-8">';
+		$result = Parser::reorder_head( $malformed_doc );
+		if ( $result === $malformed_doc ) {
+			self::$passed++;
+			echo "✅ PASS: Malformed document without closing </head> returned unmodified\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Malformed document handling failed\n";
 		}
 	}
 

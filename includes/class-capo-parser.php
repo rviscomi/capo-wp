@@ -36,7 +36,7 @@ class Parser {
 		}
 
 		// Locate the <head>...</head> section.
-		$head_pattern = '/<head(\s[^>]*)?>(.*?)<\/head>/is';
+		$head_pattern = '/<head(?P<head_attrs>(?:\s+[^"\'\/>=\s]+(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'=<>`]+))?)*\s*)>(?P<head_content>[\s\S]*?)<\/head>/i';
 		if ( ! preg_match( $head_pattern, $html, $matches, PREG_OFFSET_CAPTURE ) ) {
 			return $html;
 		}
@@ -44,8 +44,8 @@ class Parser {
 		$start_time     = microtime( true );
 		$full_match_str = $matches[0][0];
 		$match_offset   = $matches[0][1];
-		$head_attrs_str = isset( $matches[1][0] ) ? $matches[1][0] : '';
-		$head_content   = $matches[2][0];
+		$head_attrs_str = isset( $matches['head_attrs'][0] ) ? $matches['head_attrs'][0] : '';
+		$head_content   = isset( $matches['head_content'][0] ) ? $matches['head_content'][0] : '';
 
 		// Tokenize elements within <head>.
 		$tokens = self::tokenize_head( $head_content );
@@ -113,7 +113,7 @@ class Parser {
 	}
 
 	/**
-	 * Tokenize head content into discrete HTML tags and comments.
+	 * Tokenize head content into discrete HTML tags, conditional comments, CDATA, and comments.
 	 *
 	 * @param string $head_content Inner content of <head>.
 	 * @return array<int, array<string, mixed>> List of tokens with weights and positions.
@@ -124,17 +124,23 @@ class Parser {
 		$token_index      = 0;
 
 		// Regex pattern to extract top-level tokens in <head>.
+		// Supports quoted attribute values containing '>', CDATA blocks, and IE conditional comments.
 		$pattern = '/
 			(?P<comment><!--[\s\S]*?-->)
 			|
-			(?P<container_tag><(?P<ctag_name>script|style|title|template|noscript)(?P<ctag_attrs>\s[^>]*)?>[\s\S]*?<\/(?P=ctag_name)\s*>)
+			(?P<conditional_comment><!\[if[\s\S]*?<!\[endif\]>|<!\s*\[if[^\]]*\]>|<!\s*\[endif\]>)
 			|
-			(?P<void_tag><(?P<vtag_name>meta|link|base)(?P<vtag_attrs>\s[^>]*)?\s*\/?>)
+			(?P<cdata><!\[CDATA\[[\s\S]*?\]\]>)
 			|
-			(?P<generic_tag><(?P<gtag_name>[a-zA-Z0-9:-]+)(?P<gtag_attrs>\s[^>]*)?>(?:[\s\S]*?<\/(?P=gtag_name)\s*>|\s*\/?>)?)
+			(?P<container_tag><(?P<ctag_name>script|style|title|template|noscript)(?P<ctag_attrs>(?:\s+[^"\'\/>=\s]+(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'=<>`]+))?)*\s*)>(?P<ctag_content>[\s\S]*?)<\/(?P=ctag_name)\s*>)
+			|
+			(?P<void_tag><(?P<vtag_name>meta|link|base)(?P<vtag_attrs>(?:\s+[^"\'\/>=\s]+(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'=<>`]+))?)*\s*)\s*\/?>)
+			|
+			(?P<generic_tag><(?P<gtag_name>[a-zA-Z0-9:-]+)(?P<gtag_attrs>(?:\s+[^"\'\/>=\s]+(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'=<>`]+))?)*\s*)\s*(?:\/>|>(?P<gtag_inner>[\s\S]*?)<\/(?P=gtag_name)\s*>|>))
 		/ix';
 
-		if ( ! preg_match_all( $pattern, $head_content, $matches, PREG_SET_ORDER ) ) {
+		$res = preg_match_all( $pattern, $head_content, $matches, PREG_SET_ORDER );
+		if ( false === $res || PREG_NO_ERROR !== preg_last_error() ) {
 			return $tokens;
 		}
 
@@ -143,27 +149,35 @@ class Parser {
 				$pending_comments[] = trim( $match['comment'] );
 				continue;
 			}
+			if ( ! empty( $match['conditional_comment'] ) ) {
+				$pending_comments[] = trim( $match['conditional_comment'] );
+				continue;
+			}
+			if ( ! empty( $match['cdata'] ) ) {
+				$pending_comments[] = trim( $match['cdata'] );
+				continue;
+			}
 
-			$tag_name       = '';
-			$attrs_str      = '';
-			$raw_html       = '';
-			$inner_content  = '';
+			$tag_name      = '';
+			$attrs_str     = '';
+			$raw_html      = '';
+			$inner_content = '';
 
 			if ( ! empty( $match['container_tag'] ) ) {
-				$tag_name  = strtolower( $match['ctag_name'] );
-				$attrs_str = isset( $match['ctag_attrs'] ) ? $match['ctag_attrs'] : '';
-				$raw_html  = $match['container_tag'];
-
-				// Extract inner content.
-				$inner_content = preg_replace( '/^<[a-zA-Z0-9:-]+[^>]*>|<\/[a-zA-Z0-9:-]+\s*>$/is', '', $raw_html );
+				$tag_name      = strtolower( $match['ctag_name'] );
+				$attrs_str     = isset( $match['ctag_attrs'] ) ? $match['ctag_attrs'] : '';
+				$raw_html      = $match['container_tag'];
+				$inner_content = isset( $match['ctag_content'] ) ? $match['ctag_content'] : '';
 			} elseif ( ! empty( $match['void_tag'] ) ) {
-				$tag_name  = strtolower( $match['vtag_name'] );
-				$attrs_str = isset( $match['vtag_attrs'] ) ? $match['vtag_attrs'] : '';
-				$raw_html  = $match['void_tag'];
+				$tag_name      = strtolower( $match['vtag_name'] );
+				$attrs_str     = isset( $match['vtag_attrs'] ) ? $match['vtag_attrs'] : '';
+				$raw_html      = $match['void_tag'];
+				$inner_content = '';
 			} elseif ( ! empty( $match['generic_tag'] ) ) {
-				$tag_name  = strtolower( $match['gtag_name'] );
-				$attrs_str = isset( $match['gtag_attrs'] ) ? $match['gtag_attrs'] : '';
-				$raw_html  = $match['generic_tag'];
+				$tag_name      = strtolower( $match['gtag_name'] );
+				$attrs_str     = isset( $match['gtag_attrs'] ) ? $match['gtag_attrs'] : '';
+				$raw_html      = $match['generic_tag'];
+				$inner_content = isset( $match['gtag_inner'] ) ? $match['gtag_inner'] : '';
 			}
 
 			if ( empty( $tag_name ) ) {
@@ -217,15 +231,15 @@ class Parser {
 			return $attrs;
 		}
 
-		$pattern = '/([a-zA-Z0-9_:-]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+)))?/i';
+		$pattern = '/([^\s"\'=<>`]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]+)))?/i';
 		if ( preg_match_all( $pattern, $attrs_str, $matches, PREG_SET_ORDER ) ) {
 			foreach ( $matches as $match ) {
 				$name = strtolower( $match[1] );
-				if ( isset( $match[2] ) && '' !== $match[2] ) {
+				if ( isset( $match[2] ) && false !== $match[2] && '' !== $match[2] ) {
 					$val = $match[2];
-				} elseif ( isset( $match[3] ) && '' !== $match[3] ) {
+				} elseif ( isset( $match[3] ) && false !== $match[3] && '' !== $match[3] ) {
 					$val = $match[3];
-				} elseif ( isset( $match[4] ) && '' !== $match[4] ) {
+				} elseif ( isset( $match[4] ) && false !== $match[4] && '' !== $match[4] ) {
 					$val = $match[4];
 				} else {
 					$val = '';
