@@ -77,13 +77,26 @@ Capo groups elements into 11 strictly evaluated priority weights (from 10 down t
 
 ---
 
-## 🧪 Testing Parity
+## 🧪 Testing & Rule Synchronization
 
-Capo WP includes automated test suites ensuring 1:1 parity with the upstream `capo.js` rule definitions:
+Capo for WordPress is maintained with 1:1 parity against [`@rviscomi/capo.js`](https://github.com/rviscomi/capo.js).
 
+### Run Test Suites
 ```bash
+# Run PHP standalone unit tests
 php tests/test-rules.php
 php tests/test-parser.php
+
+# Run cross-language parity assertions (Node.js + PHP)
+npm run test:parity
+```
+
+### Synchronize Rules from Upstream `capo.js`
+The PHP rules engine (`includes/class-capo-rules.php`) can be regenerated directly from `@rviscomi/capo.js`:
+```bash
+npm install
+npm run sync-rules
+npm run test:parity
 ```
 
 ---

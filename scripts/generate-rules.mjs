@@ -1,10 +1,74 @@
-<?php
+#!/usr/bin/env node
+
+/**
+ * Capo Rules PHP Generator
+ *
+ * Generates includes/class-capo-rules.php directly from @rviscomi/capo.js/rules.
+ * Run via: npm run sync-rules
+ */
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  ElementWeights,
+  META_HTTP_EQUIV_KEYWORDS,
+} from '@rviscomi/capo.js/rules';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, '..');
+const targetFile = path.join(rootDir, 'includes', 'class-capo-rules.php');
+
+// Read package version of @rviscomi/capo.js
+const capoPackageJsonPath = path.join(rootDir, 'node_modules', '@rviscomi', 'capo.js', 'package.json');
+let capoVersion = 'unknown';
+try {
+  const capoPkg = JSON.parse(fs.readFileSync(capoPackageJsonPath, 'utf8'));
+  capoVersion = capoPkg.version || 'unknown';
+} catch (e) {
+  // Ignore fallback
+}
+
+// Generate weight constants
+const weightEntries = Object.entries(ElementWeights);
+const maxWeightKeyLen = Math.max(...weightEntries.map(([k]) => k.length));
+const weightConstants = weightEntries
+  .map(([key, val]) => `\tconst WEIGHT_${key.padEnd(maxWeightKeyLen)} = ${val};`)
+  .join('\n');
+
+// Generate keywords array
+const keywordsList = META_HTTP_EQUIV_KEYWORDS
+  .map((kw) => `\t\t'${kw}',`)
+  .join('\n');
+
+// Generate category labels switch cases
+const categoryLabels = {
+  WEIGHT_META: 'Critical Meta / Viewport',
+  WEIGHT_TITLE: 'Title',
+  WEIGHT_PRECONNECT: 'Preconnect',
+  WEIGHT_ASYNC_SCRIPT: 'Async Script',
+  WEIGHT_IMPORT_STYLES: 'CSS @import Styles',
+  WEIGHT_SYNC_SCRIPT: 'Sync / Inline Script',
+  WEIGHT_SYNC_STYLES: 'Stylesheet / Style Block',
+  WEIGHT_PRELOAD: 'Preload / Modulepreload',
+  WEIGHT_DEFER_SCRIPT: 'Defer Script',
+  WEIGHT_PREFETCH_PRERENDER: 'Prefetch / Prerender',
+  WEIGHT_OTHER: 'Other Metadata',
+};
+
+const categoryCases = Object.entries(categoryLabels)
+  .filter(([c]) => c !== 'WEIGHT_OTHER')
+  .map(([constName, label]) => `\t\t\tcase self::${constName}:\n\t\t\t\treturn '${label}';`)
+  .join('\n');
+
+const phpCode = `<?php
 /**
  * Capo Rules Engine
  *
  * Implements the 1:1 classification rules and weight matrix from capo.js.
- * AUTO-GENERATED from @rviscomi/capo.js (v2.2.0).
- * DO NOT EDIT DIRECTLY. Run `npm run sync-rules` to regenerate.
+ * AUTO-GENERATED from @rviscomi/capo.js (v${capoVersion}).
+ * DO NOT EDIT DIRECTLY. Run \`npm run sync-rules\` to regenerate.
  *
  * @package Capo
  * @author  Rick Viscomi
@@ -20,17 +84,7 @@ class Rules {
 	/**
 	 * Element weight constants (matching capo.js ElementWeights).
 	 */
-	const WEIGHT_META               = 10;
-	const WEIGHT_TITLE              = 9;
-	const WEIGHT_PRECONNECT         = 8;
-	const WEIGHT_ASYNC_SCRIPT       = 7;
-	const WEIGHT_IMPORT_STYLES      = 6;
-	const WEIGHT_SYNC_SCRIPT        = 5;
-	const WEIGHT_SYNC_STYLES        = 4;
-	const WEIGHT_PRELOAD            = 3;
-	const WEIGHT_DEFER_SCRIPT       = 2;
-	const WEIGHT_PREFETCH_PRERENDER = 1;
-	const WEIGHT_OTHER              = 0;
+${weightConstants}
 
 	/**
 	 * Critical http-equiv header keywords (matching capo.js META_HTTP_EQUIV_KEYWORDS).
@@ -38,13 +92,7 @@ class Rules {
 	 * @var string[]
 	 */
 	const META_HTTP_EQUIV_KEYWORDS = array(
-		'accept-ch',
-		'content-security-policy',
-		'content-type',
-		'default-style',
-		'delegate-ch',
-		'origin-trial',
-		'x-dns-prefetch-control',
+${keywordsList}
 	);
 
 	/**
@@ -323,29 +371,14 @@ class Rules {
 	 */
 	public static function get_category_name( $weight ) {
 		switch ( $weight ) {
-			case self::WEIGHT_META:
-				return 'Critical Meta / Viewport';
-			case self::WEIGHT_TITLE:
-				return 'Title';
-			case self::WEIGHT_PRECONNECT:
-				return 'Preconnect';
-			case self::WEIGHT_ASYNC_SCRIPT:
-				return 'Async Script';
-			case self::WEIGHT_IMPORT_STYLES:
-				return 'CSS @import Styles';
-			case self::WEIGHT_SYNC_SCRIPT:
-				return 'Sync / Inline Script';
-			case self::WEIGHT_SYNC_STYLES:
-				return 'Stylesheet / Style Block';
-			case self::WEIGHT_PRELOAD:
-				return 'Preload / Modulepreload';
-			case self::WEIGHT_DEFER_SCRIPT:
-				return 'Defer Script';
-			case self::WEIGHT_PREFETCH_PRERENDER:
-				return 'Prefetch / Prerender';
+${categoryCases}
 			case self::WEIGHT_OTHER:
 			default:
 				return 'Other Metadata';
 		}
 	}
 }
+`;
+
+fs.writeFileSync(targetFile, phpCode, 'utf8');
+console.log(`✅ Successfully generated ${path.relative(rootDir, targetFile)} from @rviscomi/capo.js (v${capoVersion})`);

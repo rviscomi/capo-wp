@@ -1,0 +1,16 @@
+{
+  "name": "capo-wp-dev",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Developer tooling and rule synchronization for Capo WordPress plugin",
+  "type": "module",
+  "scripts": {
+    "sync-rules": "node scripts/generate-rules.mjs",
+    "test:parity": "node scripts/test-parity.mjs",
+    "test": "node scripts/test-parity.mjs && export PATH=\"/opt/homebrew/bin:$PATH\" && php tests/test-rules.php && php tests/test-parser.php"
+  },
+  "devDependencies": {
+    "@rviscomi/capo.js": "^2.2.0",
+    "jsdom": "^26.0.0"
+  }
+}
