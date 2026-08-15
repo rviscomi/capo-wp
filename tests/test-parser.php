@@ -23,6 +23,8 @@ class Capo_Parser_Test {
 
 		self::test_attribute_parsing();
 		self::test_quoted_attributes_with_greater_than();
+		self::test_empty_value_attributes();
+		self::test_zero_match_tokenization();
 		self::test_conditional_comments_and_cdata();
 		self::test_large_payloads_and_malformed_html();
 		self::test_stable_sorting();
@@ -328,6 +330,43 @@ HTML;
 		} else {
 			self::$failed++;
 			echo "❌ FAIL: Pass-by-reference analysis failed\n";
+		}
+	}
+
+	private static function test_empty_value_attributes() {
+		echo "\nTesting empty-value and boolean attribute parsing...\n";
+
+		$html = '<meta name="" content="test"><script defer src="app.js"></script>';
+		$tokens = Parser::tokenize_head( $html );
+
+		if ( count( $tokens ) === 2 &&
+			'' === $tokens[0]['attrs']['name'] &&
+			'test' === $tokens[0]['attrs']['content'] &&
+			'' === $tokens[1]['attrs']['defer'] &&
+			'app.js' === $tokens[1]['attrs']['src'] ) {
+			self::$passed++;
+			echo "✅ PASS: Empty quoted values and boolean attributes parsed correctly\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Empty-value or boolean attribute parsing broken\n";
+		}
+	}
+
+	private static function test_zero_match_tokenization() {
+		echo "\nTesting zero-match tokenization (no tags in head content)...\n";
+
+		$tokens_whitespace = Parser::tokenize_head( "   \n\t  " );
+		$tokens_empty      = Parser::tokenize_head( '' );
+		$tokens_text       = Parser::tokenize_head( 'just plain text, no tags' );
+
+		if ( array() === $tokens_whitespace &&
+			array() === $tokens_empty &&
+			array() === $tokens_text ) {
+			self::$passed++;
+			echo "✅ PASS: Whitespace-only, empty, and text-only head content return empty token arrays\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Zero-match tokenization returned unexpected tokens\n";
 		}
 	}
 }

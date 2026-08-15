@@ -21,7 +21,7 @@ class Parser {
 	 *
 	 * @var array<string, mixed>|null
 	 */
-	public static $last_analysis = null;
+	private static $last_analysis = null;
 
 	/**
 	 * Get the last execution analysis result.
@@ -254,14 +254,14 @@ class Parser {
 		}
 
 		$pattern = '/([^\s"\'=<>`]+)(?:\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s"\'=<>`]+)))?/i';
-		if ( preg_match_all( $pattern, $attrs_str, $matches, PREG_SET_ORDER ) ) {
+		if ( preg_match_all( $pattern, $attrs_str, $matches, PREG_SET_ORDER | PREG_UNMATCHED_AS_NULL ) ) {
 			foreach ( $matches as $match ) {
 				$name = strtolower( $match[1] );
-				if ( isset( $match[2] ) && false !== $match[2] && '' !== $match[2] ) {
+				if ( null !== $match[2] ) {
 					$val = $match[2];
-				} elseif ( isset( $match[3] ) && false !== $match[3] && '' !== $match[3] ) {
+				} elseif ( null !== $match[3] ) {
 					$val = $match[3];
-				} elseif ( isset( $match[4] ) && false !== $match[4] && '' !== $match[4] ) {
+				} elseif ( null !== $match[4] ) {
 					$val = $match[4];
 				} else {
 					$val = '';
