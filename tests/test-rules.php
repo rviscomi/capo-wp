@@ -7,10 +7,7 @@
  * @package Capo
  */
 
-defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ );
-
-require_once __DIR__ . '/../includes/class-capo-rules.php';
-require_once __DIR__ . '/../includes/class-capo-parser.php';
+require_once __DIR__ . '/bootstrap.php';
 
 use Capo\Rules;
 use Capo\Parser;
