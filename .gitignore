@@ -1,0 +1,25 @@
+# OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Node / NPM
+node_modules/
+npm-debug.log
+
+# Composer
+vendor/
+composer.lock
+
+# Build & Archives
+*.zip
+*.tar.gz
+build/
+dist/
+
+# Test / Coverage artifacts
+.phpunit.result.cache
+coverage/
