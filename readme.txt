@@ -5,7 +5,7 @@ Tags: performance, speed, head, seo, optimization, web-vitals
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 0.1.0
+Stable tag: 0.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,14 +70,19 @@ You can view any page with `?capo=off` appended to the URL to bypass reordering 
 
 == Changelog ==
 
+= 0.1.1 =
+* Added `<head>` validation engine with Origin Trial binary token decoding and origin/expiry checks.
+* Added live page diagnostics to frontend WordPress Admin Toolbar with scrollable warnings dropdown.
+* Added HTML syntax highlighting and decoded token metadata table in WordPress Site Health.
+* Improved toolbar integration and output buffering lifecycle.
+
 = 0.1.0 =
 * Initial public beta release.
 * Output buffering engine for automatic `<head>` reordering.
 * 1:1 parity with `@rviscomi/capo.js` rules and validation engine.
-* Admin Bar live page diagnostics and Site Health hygiene integration.
-* Bypass mode (`?capo=off`).
+* Site Health integration and bypass mode (`?capo=off`).
 
 == Upgrade Notice ==
 
-= 0.1.0 =
-Initial development beta release of Capo for WordPress.
+= 0.1.1 =
+Includes validation engine, Admin Toolbar live diagnostics, and enhanced Site Health inspection.
