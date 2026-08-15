@@ -6,8 +6,11 @@
   "type": "module",
   "scripts": {
     "sync-rules": "node scripts/generate-rules.mjs",
+    "update-upstream": "node scripts/check-upstream.mjs",
     "test:parity": "node scripts/test-parity.mjs",
-    "test": "node scripts/test-parity.mjs && export PATH=\"/opt/homebrew/bin:$PATH\" && php tests/test-rules.php && php tests/test-parser.php"
+    "test": "node scripts/test-parity.mjs && export PATH=\"/opt/homebrew/bin:$PATH\" && php tests/test-rules.php && php tests/test-parser.php",
+    "package": "node scripts/package.mjs",
+    "build": "npm run sync-rules && npm run package"
   },
   "devDependencies": {
     "@rviscomi/capo.js": "^2.2.0",

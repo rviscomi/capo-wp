@@ -1,0 +1,49 @@
+name: Release Capo for WordPress
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run cross-language parity test
+        run: node scripts/test-parity.mjs
+
+      - name: Run PHP test suite
+        run: |
+          php tests/test-rules.php
+          php tests/test-parser.php
+
+      - name: Build release archive
+        run: npm run package
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/capo.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false

@@ -1,0 +1,51 @@
+name: Sync Upstream Capo Rules
+
+on:
+  schedule:
+    - cron: '0 0 * * 1' # Every Monday at 00:00 UTC
+  workflow_dispatch:     # Manual trigger via GitHub Actions UI
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  check-and-sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check upstream updates and regenerate rules
+        run: node scripts/check-upstream.mjs
+
+      - name: Create Pull Request if updated
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(deps): update @rviscomi/capo.js and sync rules"
+          title: "chore(deps): sync rules with latest @rviscomi/capo.js"
+          body: |
+            Automated pull request triggered by upstream `@rviscomi/capo.js` release.
+            
+            - Updated `@rviscomi/capo.js` to latest version.
+            - Regenerated `includes/class-capo-rules.php`.
+            - Verified all cross-language parity assertions and PHP test suites pass.
+          branch: "chore/sync-upstream-capo"
+          delete-branch: true
+          labels: |
+            dependencies
+            automated-pr

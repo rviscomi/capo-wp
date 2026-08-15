@@ -92,11 +92,16 @@ npm run test:parity
 ```
 
 ### Synchronize Rules from Upstream `capo.js`
-The PHP rules engine (`includes/class-capo-rules.php`) can be regenerated directly from `@rviscomi/capo.js`:
+Check npm for upstream updates, auto-upgrade dependencies, regenerate PHP rules, and run parity tests in one step:
 ```bash
-npm install
+npm run update-upstream
+```
+
+Or manually regenerate and package:
+```bash
 npm run sync-rules
 npm run test:parity
+npm run package
 ```
 
 ---
