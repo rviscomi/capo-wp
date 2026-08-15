@@ -34,7 +34,6 @@ const filesToCopy = [
   'uninstall.php',
   'LICENSE',
   'readme.txt',
-  'README.md',
 ];
 
 const dirsToCopy = [

@@ -11,7 +11,7 @@
 
 namespace Capo;
 
-defined( 'ABSPATH' ) || defined( 'CAPO_TEST_SUITE' ) || exit;
+defined( 'ABSPATH' ) || exit;
 
 class Validator {
 
@@ -365,8 +365,8 @@ class Validator {
 		}
 
 		if ( $target_origin && isset( $payload['origin'] ) ) {
-			$target_parsed = parse_url( $target_origin );
-			$token_parsed  = parse_url( $payload['origin'] );
+			$target_parsed = wp_parse_url( $target_origin );
+			$token_parsed  = wp_parse_url( $payload['origin'] );
 
 			$target_host = isset( $target_parsed['host'] ) ? strtolower( $target_parsed['host'] ) : '';
 			$token_host  = isset( $token_parsed['host'] ) ? strtolower( $token_parsed['host'] ) : '';

@@ -196,7 +196,7 @@ const phpPayload = JSON.stringify({
 });
 
 const phpCode = `
-define('CAPO_TEST_SUITE', true);
+defined('ABSPATH') || define('ABSPATH', true);
 require_once '${rulesPhpPath.replace(/\\/g, '/')}';
 require_once '${validatorPhpPath.replace(/\\/g, '/')}';
 require_once '${parserPhpPath.replace(/\\/g, '/')}';

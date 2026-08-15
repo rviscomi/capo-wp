@@ -13,7 +13,7 @@
 
 namespace Capo;
 
-defined( 'ABSPATH' ) || defined( 'CAPO_TEST_SUITE' ) || exit;
+defined( 'ABSPATH' ) || exit;
 
 class Rules {
 
