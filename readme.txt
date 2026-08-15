@@ -1,11 +1,11 @@
 === Capo ===
 Contributors: rviscomi
 Donate link: https://rviscomi.dev/
-Tags: performance, speed, head, seo, optimization, web-vitals
+Tags: performance, speed, head, seo, web-vitals
 Requires at least: 6.0
 Tested up to: 6.7
 Requires PHP: 7.4
-Stable tag: 0.1.1
+Stable tag: 0.1.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -70,6 +70,14 @@ You can view any page with `?capo=off` appended to the URL to bypass reordering 
 
 == Changelog ==
 
+= 0.1.2 =
+* Adhered strictly to WordPress.org Plugin Directory guidelines and security standards.
+* Changed debug performance HTML comment to opt-in by default and removed external URLs.
+* Added uninstall.php handler to clean up database options on deletion.
+* Fixed PHP 7.4 backwards compatibility in origin trial subdomain validation.
+* Removed insecure sslverify override from Site Health loopback check.
+* Enforced 5-tag maximum limit in readme metadata.
+
 = 0.1.1 =
 * Added `<head>` validation engine with Origin Trial binary token decoding and origin/expiry checks.
 * Added live page diagnostics to frontend WordPress Admin Toolbar with scrollable warnings dropdown.
@@ -83,6 +91,9 @@ You can view any page with `?capo=off` appended to the URL to bypass reordering 
 * Site Health integration and bypass mode (`?capo=off`).
 
 == Upgrade Notice ==
+
+= 0.1.2 =
+Adds full WordPress.org directory compliance, opt-in debug comments, uninstall cleanup, and PHP 7.4 compatibility improvements.
 
 = 0.1.1 =
 Includes validation engine, Admin Toolbar live diagnostics, and enhanced Site Health inspection.

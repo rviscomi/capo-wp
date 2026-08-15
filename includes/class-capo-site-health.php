@@ -145,8 +145,7 @@ class Site_Health {
 		$response  = wp_remote_get(
 			$audit_url,
 			array(
-				'timeout'   => 5,
-				'sslverify' => false,
+				'timeout' => 5,
 			)
 		);
 

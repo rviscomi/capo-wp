@@ -96,13 +96,13 @@ class Parser {
 
 		// Build debug/comment header if requested.
 		$debug_comment = '';
-		$include_debug = isset( $options['debug_comment'] ) ? (bool) $options['debug_comment'] : true;
+		$include_debug = isset( $options['debug_comment'] ) ? (bool) $options['debug_comment'] : false;
 		if ( $include_debug ) {
 			$warning_suffix = '';
 			if ( ! empty( $warnings ) ) {
 				$warning_suffix = sprintf( ' | %d warning%s', count( $warnings ), count( $warnings ) === 1 ? '' : 's' );
 			}
-			$debug_comment = "\t<!-- Reordered by Capo (https://rviscomi.github.io/capo.js/) [" .
+			$debug_comment = "\t<!-- Reordered by Capo [" .
 				$element_count . ' elements optimized in ' . $elapsed_ms . 'ms' . $warning_suffix . "] -->\n";
 		}
 

@@ -31,6 +31,7 @@ fs.mkdirSync(pluginStageDir, { recursive: true });
 // Production files/directories to include
 const filesToCopy = [
   'capo.php',
+  'uninstall.php',
   'LICENSE',
   'readme.txt',
   'README.md',

@@ -373,7 +373,7 @@ class Validator {
 
 			if ( $target_host && $token_host && $target_host !== $token_host ) {
 				$is_subdomain = false;
-				if ( strlen( $target_host ) > strlen( $token_host ) && str_ends_with( $target_host, '.' . $token_host ) ) {
+				if ( strlen( $target_host ) > strlen( $token_host ) && substr( $target_host, -strlen( '.' . $token_host ) ) === '.' . $token_host ) {
 					$is_subdomain = true;
 				}
 

@@ -75,7 +75,7 @@ class Plugin {
 		}
 
 		$options = array(
-			'debug_comment' => (bool) get_option( 'capo_debug_comment', 1 ),
+			'debug_comment' => (bool) get_option( 'capo_debug_comment', 0 ),
 		);
 
 		$html = Parser::reorder_head( $html, $options );

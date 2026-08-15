@@ -77,7 +77,7 @@ class Admin {
 			array(
 				'type'              => 'boolean',
 				'sanitize_callback' => 'rest_sanitize_boolean',
-				'default'           => 1,
+				'default'           => 0,
 			)
 		);
 
@@ -129,7 +129,7 @@ class Admin {
 	 * Render debug comment toggle.
 	 */
 	public function render_field_debug_comment() {
-		$debug = (bool) get_option( 'capo_debug_comment', 1 );
+		$debug = (bool) get_option( 'capo_debug_comment', 0 );
 		?>
 		<label for="capo_debug_comment">
 			<input type="checkbox" id="capo_debug_comment" name="capo_debug_comment" value="1" <?php checked( $debug, true ); ?> />
