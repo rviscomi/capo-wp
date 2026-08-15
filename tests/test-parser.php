@@ -9,12 +9,37 @@
  */
 
 defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ );
+defined( 'CAPO_PLUGIN_BASENAME' ) || define( 'CAPO_PLUGIN_BASENAME', 'capo/capo.php' );
 
 require_once __DIR__ . '/../includes/class-capo-rules.php';
 require_once __DIR__ . '/../includes/class-capo-validator.php';
 require_once __DIR__ . '/../includes/class-capo-parser.php';
+require_once __DIR__ . '/../includes/class-capo-admin.php';
+
+// Polyfills for standalone testing.
+if ( ! function_exists( 'esc_html' ) ) {
+	function esc_html( $text ) {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+if ( ! function_exists( 'esc_attr' ) ) {
+	function esc_attr( $text ) {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+if ( ! function_exists( 'esc_url' ) ) {
+	function esc_url( $url ) {
+		return filter_var( $url, FILTER_SANITIZE_URL );
+	}
+}
+if ( ! function_exists( 'admin_url' ) ) {
+	function admin_url( $path = '' ) {
+		return 'https://example.com/wp-admin/' . $path;
+	}
+}
 
 use Capo\Parser;
+use Capo\Admin;
 
 class Capo_Parser_Test {
 
@@ -31,6 +56,7 @@ class Capo_Parser_Test {
 		self::test_stable_sorting();
 		self::test_comment_association();
 		self::test_full_head_reordering();
+		self::test_admin_bar_injection();
 
 		echo "\n" . sprintf( "Results: %d passed, %d failed\n", self::$passed, self::$failed );
 		if ( self::$failed > 0 ) {
@@ -271,6 +297,36 @@ HTML;
 		} else {
 			self::$failed++;
 			echo "❌ FAIL: Debug comment missing\n";
+		}
+	}
+
+	private static function test_admin_bar_injection() {
+		echo "\nTesting Admin Toolbar HTML injection and backreference safety...\n";
+
+		$html = '<div id="wpadminbar"><ul id="wp-admin-bar-root-default"><li id="wp-admin-bar-capo-diagnostics" class="menupop"><a class="ab-item" href="https://example.com/wp-admin/options-general.php?page=capo">Capo</a></li></ul></div>';
+
+		// Analysis containing special characters like $1, \1, and special symbols that could trigger backreference bugs.
+		$analysis = array(
+			'element_count' => 12,
+			'elapsed_ms'    => 1.45,
+			'warnings'      => array(
+				array(
+					'rule_id' => 'no-invalid-head-elements',
+					'warning' => 'Invalid tag with $1 and \1 pattern inside warning text',
+				),
+			),
+		);
+
+		$injected = Admin::inject_admin_bar_html( $html, $analysis );
+
+		if ( false !== strpos( $injected, 'Invalid tag with $1 and \1 pattern' ) &&
+			false !== strpos( $injected, '⚡ Reordered 12 elements in 1.45ms' ) &&
+			false !== strpos( $injected, '⚠️ Capo (1)' ) ) {
+			self::$passed++;
+			echo "✅ PASS: Admin Toolbar injected successfully without backreference corruption\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Admin Toolbar injection failed or corrupted special characters\n";
 		}
 	}
 }

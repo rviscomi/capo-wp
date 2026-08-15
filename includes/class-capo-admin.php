@@ -234,7 +234,7 @@ class Admin {
 			return $html;
 		}
 
-		$warning_count = count( $analysis['warnings'] );
+		$warning_count = isset( $analysis['warnings'] ) ? count( $analysis['warnings'] ) : 0;
 		$has_warnings  = $warning_count > 0;
 
 		if ( $has_warnings ) {
@@ -245,12 +245,15 @@ class Admin {
 			$main_url   = admin_url( 'options-general.php?page=capo' );
 		}
 
+		$element_count = isset( $analysis['element_count'] ) ? intval( $analysis['element_count'] ) : 0;
+		$elapsed_ms    = isset( $analysis['elapsed_ms'] ) ? $analysis['elapsed_ms'] : 0;
+
 		$submenu_items = '';
 		$submenu_items .= sprintf(
 			'<li role="group" id="wp-admin-bar-capo-metric"><a class="ab-item" role="menuitem" href="%s">⚡ Reordered %d elements in %sms</a></li>',
 			esc_url( admin_url( 'options-general.php?page=capo' ) ),
-			intval( $analysis['element_count'] ),
-			esc_html( $analysis['elapsed_ms'] )
+			$element_count,
+			esc_html( $elapsed_ms )
 		);
 
 		if ( $has_warnings ) {
@@ -259,8 +262,8 @@ class Admin {
 					'<li role="group" id="wp-admin-bar-capo-warn-%d"><a class="ab-item" role="menuitem" href="%s" style="white-space:normal;height:auto;line-height:1.4;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,0.07);"><span style="color:#dba617;font-weight:600;font-size:12px;">⚠️ %s</span><br><span style="color:#f0f0f1;font-size:12px;display:block;margin-top:2px;">%s</span></a></li>',
 					$idx,
 					esc_url( admin_url( 'site-health.php' ) ),
-					esc_html( $w['rule_id'] ),
-					esc_html( $w['warning'] )
+					esc_html( isset( $w['rule_id'] ) ? $w['rule_id'] : '' ),
+					esc_html( isset( $w['warning'] ) ? $w['warning'] : '' )
 				);
 			}
 		} else {
@@ -277,8 +280,17 @@ class Admin {
 			$submenu_items
 		);
 
-		$pattern = '/<li\s+[^>]*id=[\'"]wp-admin-bar-capo-diagnostics[\'"][^>]*>.*?<\/li>/s';
-		return preg_replace( $pattern, $node_html, $html, 1 );
+		$pattern  = '/<li\b(?:\s+[^"\'\/>=\s]+(?:\s*=\s*(?:"[^"]*"|\'[^\']*\'|[^\s"\'=<>`]+))?)*\s*id=[\'"]wp-admin-bar-capo-diagnostics[\'"][^>]*>.*?<\/li>/is';
+		$replaced = preg_replace_callback(
+			$pattern,
+			function() use ( $node_html ) {
+				return $node_html;
+			},
+			$html,
+			1
+		);
+
+		return null !== $replaced ? $replaced : $html;
 	}
 }
 
