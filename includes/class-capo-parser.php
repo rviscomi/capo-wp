@@ -24,13 +24,32 @@ class Parser {
 	public static $last_analysis = null;
 
 	/**
+	 * Get the last execution analysis result.
+	 *
+	 * @return array<string, mixed>|null
+	 */
+	public static function get_last_analysis() {
+		return self::$last_analysis;
+	}
+
+	/**
+	 * Reset the last execution analysis result.
+	 */
+	public static function reset_analysis() {
+		self::$last_analysis = null;
+	}
+
+	/**
 	 * Reorder the <head> elements in a full HTML document.
 	 *
-	 * @param string $html Full HTML document.
-	 * @param array  $options Optional configuration flags.
+	 * @param string                    $html Full HTML document.
+	 * @param array                     $options Optional configuration flags.
+	 * @param array<string, mixed>|null $analysis Optional output parameter populated with execution metrics.
 	 * @return string Modified HTML document with reordered <head>.
 	 */
-	public static function reorder_head( $html, array $options = array() ) {
+	public static function reorder_head( $html, array $options = array(), &$analysis = null ) {
+		$analysis = null;
+
 		if ( empty( $html ) || ! is_string( $html ) ) {
 			return $html;
 		}
@@ -87,12 +106,15 @@ class Parser {
 		$elapsed_ms = round( ( microtime( true ) - $start_time ) * 1000, 2 );
 
 		// Record analysis.
-		self::$last_analysis = array(
+		$result_analysis = array(
 			'element_count' => $element_count,
 			'elapsed_ms'    => $elapsed_ms,
 			'warnings'      => $warnings,
 			'tokens'        => $tokens,
 		);
+
+		self::$last_analysis = $result_analysis;
+		$analysis            = $result_analysis;
 
 		// Build debug/comment header if requested.
 		$debug_comment = '';

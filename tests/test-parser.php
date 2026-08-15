@@ -57,6 +57,7 @@ class Capo_Parser_Test {
 		self::test_comment_association();
 		self::test_full_head_reordering();
 		self::test_admin_bar_injection();
+		self::test_analysis_parameter_and_accessors();
 
 		echo "\n" . sprintf( "Results: %d passed, %d failed\n", self::$passed, self::$failed );
 		if ( self::$failed > 0 ) {
@@ -327,6 +328,34 @@ HTML;
 		} else {
 			self::$failed++;
 			echo "❌ FAIL: Admin Toolbar injection failed or corrupted special characters\n";
+		}
+	}
+
+	private static function test_analysis_parameter_and_accessors() {
+		echo "\nTesting analysis parameter pass-by-reference and getter/reset methods...\n";
+
+		Parser::reset_analysis();
+		if ( null === Parser::get_last_analysis() ) {
+			self::$passed++;
+			echo "✅ PASS: Parser::reset_analysis() resets static state to null\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Parser::reset_analysis() failed\n";
+		}
+
+		$html = '<html><head><meta charset="utf-8"><title>Test</title></head><body></body></html>';
+		$analysis = null;
+		$reordered = Parser::reorder_head( $html, array(), $analysis );
+
+		if ( is_array( $analysis ) &&
+			isset( $analysis['element_count'] ) &&
+			2 === $analysis['element_count'] &&
+			Parser::get_last_analysis() === $analysis ) {
+			self::$passed++;
+			echo "✅ PASS: Pass-by-reference \$analysis populated accurately and matches get_last_analysis()\n";
+		} else {
+			self::$failed++;
+			echo "❌ FAIL: Pass-by-reference analysis failed\n";
 		}
 	}
 }

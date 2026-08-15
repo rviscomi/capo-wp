@@ -78,10 +78,11 @@ class Plugin {
 			'debug_comment' => (bool) get_option( 'capo_debug_comment', 0 ),
 		);
 
-		$html = Parser::reorder_head( $html, $options );
+		$analysis = null;
+		$html     = Parser::reorder_head( $html, $options, $analysis );
 
-		if ( Parser::$last_analysis && is_admin_bar_showing() && current_user_can( 'manage_options' ) ) {
-			$html = Admin::inject_admin_bar_html( $html, Parser::$last_analysis );
+		if ( $analysis && is_admin_bar_showing() && current_user_can( 'manage_options' ) ) {
+			$html = Admin::inject_admin_bar_html( $html, $analysis );
 		}
 
 		return $html;
