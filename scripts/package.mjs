@@ -32,6 +32,7 @@ fs.mkdirSync(pluginStageDir, { recursive: true });
 const filesToCopy = [
   'capo.php',
   'uninstall.php',
+  'composer.json',
   'LICENSE',
   'readme.txt',
 ];
