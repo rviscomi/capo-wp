@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name:       Capo - HTML Head Optimizer
+ * Plugin Name:       Capo - Head Optimizer
  * Plugin URI:        https://github.com/rviscomi/capo-wp
  * Description:       Automatically reorders the &lt;head&gt; of your WordPress pages for optimal browser rendering and web performance using the Capo.js methodology.
  * Version:           0.1.2
@@ -10,7 +10,7 @@
  * Author URI:        https://rviscomi.dev/
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       capo-html-head-optimizer
+ * Text Domain:       capo-head-optimizer
  *
  * @package Capo
  */

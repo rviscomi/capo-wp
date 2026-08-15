@@ -49,8 +49,8 @@ class Admin {
 	 */
 	public function add_options_page() {
 		add_options_page(
-			__( 'Capo Head Optimization', 'capo-html-head-optimizer' ),
-			__( 'Capo', 'capo-html-head-optimizer' ),
+			__( 'Capo Head Optimization', 'capo-head-optimizer' ),
+			__( 'Capo', 'capo-head-optimizer' ),
 			'manage_options',
 			'capo',
 			array( $this, 'render_options_page' )
@@ -83,14 +83,14 @@ class Admin {
 
 		add_settings_section(
 			'capo_general_section',
-			__( 'General Settings', 'capo-html-head-optimizer' ),
+			__( 'General Settings', 'capo-head-optimizer' ),
 			array( $this, 'render_section_description' ),
 			'capo'
 		);
 
 		add_settings_field(
 			'capo_enabled',
-			__( 'Enable Capo', 'capo-html-head-optimizer' ),
+			__( 'Enable Capo', 'capo-head-optimizer' ),
 			array( $this, 'render_field_enabled' ),
 			'capo',
 			'capo_general_section'
@@ -98,7 +98,7 @@ class Admin {
 
 		add_settings_field(
 			'capo_debug_comment',
-			__( 'HTML Stats Comment', 'capo-html-head-optimizer' ),
+			__( 'HTML Stats Comment', 'capo-head-optimizer' ),
 			array( $this, 'render_field_debug_comment' ),
 			'capo',
 			'capo_general_section'
@@ -109,7 +109,7 @@ class Admin {
 	 * Render settings section description.
 	 */
 	public function render_section_description() {
-		echo '<p>' . esc_html__( 'Capo automatically reorganizes your HTML <head> elements so the browser can discover and fetch render-critical resources as early as possible.', 'capo-html-head-optimizer' ) . '</p>';
+		echo '<p>' . esc_html__( 'Capo automatically reorganizes your HTML <head> elements so the browser can discover and fetch render-critical resources as early as possible.', 'capo-head-optimizer' ) . '</p>';
 	}
 
 	/**
@@ -120,7 +120,7 @@ class Admin {
 		?>
 		<label for="capo_enabled">
 			<input type="checkbox" id="capo_enabled" name="capo_enabled" value="1" <?php checked( $enabled, true ); ?> />
-			<?php esc_html_e( 'Enable automatic <head> ordering on frontend page requests.', 'capo-html-head-optimizer' ); ?>
+			<?php esc_html_e( 'Enable automatic <head> ordering on frontend page requests.', 'capo-head-optimizer' ); ?>
 		</label>
 		<?php
 	}
@@ -133,7 +133,7 @@ class Admin {
 		?>
 		<label for="capo_debug_comment">
 			<input type="checkbox" id="capo_debug_comment" name="capo_debug_comment" value="1" <?php checked( $debug, true ); ?> />
-			<?php esc_html_e( 'Output a brief HTML comment in <head> with optimization metrics (e.g. element count, parse time).', 'capo-html-head-optimizer' ); ?>
+			<?php esc_html_e( 'Output a brief HTML comment in <head> with optimization metrics (e.g. element count, parse time).', 'capo-head-optimizer' ); ?>
 		</label>
 		<?php
 	}
@@ -148,7 +148,7 @@ class Admin {
 		$settings_link = sprintf(
 			'<a href="%s">%s</a>',
 			esc_url( admin_url( 'options-general.php?page=capo' ) ),
-			esc_html__( 'Settings', 'capo-html-head-optimizer' )
+			esc_html__( 'Settings', 'capo-head-optimizer' )
 		);
 		array_unshift( $links, $settings_link );
 		return $links;
@@ -168,25 +168,25 @@ class Admin {
 				<?php
 				settings_fields( 'capo_settings_group' );
 				do_settings_sections( 'capo' );
-				submit_button( __( 'Save Changes', 'capo-html-head-optimizer' ) );
+				submit_button( __( 'Save Changes', 'capo-head-optimizer' ) );
 				?>
 			</form>
 
 			<hr />
 
-			<h2><?php esc_html_e( 'Testing & Verification', 'capo-html-head-optimizer' ); ?></h2>
+			<h2><?php esc_html_e( 'Testing & Verification', 'capo-head-optimizer' ); ?></h2>
 			<p>
-				<?php esc_html_e( 'You can compare your site before and after Capo by testing your URL on the live demo:', 'capo-html-head-optimizer' ); ?>
+				<?php esc_html_e( 'You can compare your site before and after Capo by testing your URL on the live demo:', 'capo-head-optimizer' ); ?>
 				<br />
 				<a href="<?php echo esc_url( 'https://rviscomi.github.io/capo.js/user/demo/?url=' . rawurlencode( home_url( '/' ) ) ); ?>" target="_blank" rel="noopener noreferrer" class="button">
-					<?php esc_html_e( 'Analyze Site with Capo.js Demo ↗', 'capo-html-head-optimizer' ); ?>
+					<?php esc_html_e( 'Analyze Site with Capo.js Demo ↗', 'capo-head-optimizer' ); ?>
 				</a>
 			</p>
 			<p class="description">
 				<?php
 				printf(
 					/* translators: %s: query parameter example */
-					esc_html__( 'To view the un-optimized raw HTML output for debugging, append %s to any URL.', 'capo-html-head-optimizer' ),
+					esc_html__( 'To view the un-optimized raw HTML output for debugging, append %s to any URL.', 'capo-head-optimizer' ),
 					'<code>?capo=off</code>'
 				);
 				?>
@@ -215,7 +215,7 @@ class Admin {
 				'title' => '<span class="ab-icon dashicons-dashboard" style="top:2px;"></span><span class="ab-label">Capo</span>',
 				'href'  => admin_url( 'options-general.php?page=capo' ),
 				'meta'  => array(
-					'title' => esc_attr__( 'Capo Head Diagnostics & Optimization', 'capo-html-head-optimizer' ),
+					'title' => esc_attr__( 'Capo Head Diagnostics & Optimization', 'capo-head-optimizer' ),
 					'class' => 'menupop',
 				),
 			)

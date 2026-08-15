@@ -1,4 +1,4 @@
-=== Capo - HTML Head Optimizer ===
+=== Capo - Head Optimizer ===
 Contributors: rviscomi
 Donate link: https://rviscomi.dev/
 Tags: performance, speed, head, seo, web-vitals
