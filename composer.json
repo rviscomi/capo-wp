@@ -1,6 +1,6 @@
 {
   "name": "rviscomi/capo-wp",
-  "description": "WordPress plugin to automatically reorder the <head> using Capo.js rules for optimal browser rendering performance.",
+  "description": "WordPress plugin to automatically reorder the HTML head using Capo.js rules for optimal browser rendering performance.",
   "type": "wordpress-plugin",
   "license": "GPL-2.0-or-later",
   "authors": [
