@@ -20,6 +20,12 @@ composer.lock
 build/
 dist/
 
+# Environment & Secrets
+.env
+.env.*
+.env.local
+
 # Test / Coverage artifacts
 .phpunit.result.cache
 coverage/
+

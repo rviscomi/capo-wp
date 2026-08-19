@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  workflow_dispatch:
+
 
 permissions:
   contents: write
@@ -48,3 +50,11 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+
+      - name: Deploy to WordPress.org SVN
+        uses: 10up/action-wordpress-plugin-deploy@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: capo-head-optimizer
+

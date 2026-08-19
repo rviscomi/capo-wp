@@ -48,7 +48,7 @@ Capo organizes elements into 11 strict priority tiers (Weight 10 down to 0):
 
 == Installation ==
 
-1. Upload the plugin files to the `/wp-content/plugins/capo` directory, or install the plugin through the WordPress plugins screen directly.
+1. Upload the plugin files to the `/wp-content/plugins/capo-head-optimizer` directory, or install the plugin through the WordPress plugins screen directly.
 2. Activate the plugin through the **Plugins** screen in WordPress.
 3. If you use a page caching plugin (e.g. WP Super Cache, WP Rocket), clear/flush your cache.
 
