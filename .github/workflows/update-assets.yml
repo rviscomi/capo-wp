@@ -24,8 +24,10 @@ jobs:
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
         run: |
           svn checkout https://plugins.svn.wordpress.org/capo-head-optimizer/assets svn-assets --non-interactive --trust-server-cert
-          cp -r .wordpress-org/* svn-assets/
+          rsync -av --delete --exclude='.svn' .wordpress-org/ svn-assets/
           cd svn-assets
           svn add --force * || true
+          svn status | grep '^\!' | awk '{print $2}' | xargs -r svn delete || true
           svn status
           svn commit -m "Update WordPress.org directory assets" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --no-auth-cache --non-interactive
+
