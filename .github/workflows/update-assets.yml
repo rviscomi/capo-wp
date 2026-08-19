@@ -6,7 +6,6 @@ on:
       - main
     paths:
       - '.wordpress-org/**'
-      - 'readme.txt'
   workflow_dispatch:
 
 jobs:
@@ -16,9 +15,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Update WordPress.org plugin assets
-        uses: 10up/action-wordpress-plugin-asset-update@stable
+      - name: Install Subversion
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq subversion
+
+      - name: Deploy assets to WordPress.org SVN
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SLUG: capo-head-optimizer
+        run: |
+          svn checkout https://plugins.svn.wordpress.org/capo-head-optimizer/assets svn-assets --non-interactive --trust-server-cert
+          cp -r .wordpress-org/* svn-assets/
+          cd svn-assets
+          svn add --force * || true
+          svn status
+          svn commit -m "Update WordPress.org directory assets" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --no-auth-cache --non-interactive
