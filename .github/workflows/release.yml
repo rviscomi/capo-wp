@@ -44,6 +44,7 @@ jobs:
         run: npm run package
 
       - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: dist/capo.zip
@@ -51,10 +52,40 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: Install Subversion
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq subversion
+
       - name: Deploy to WordPress.org SVN
-        uses: 10up/action-wordpress-plugin-deploy@stable
         env:
           SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
           SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
-          SLUG: capo-head-optimizer
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/v}
+          else
+            VERSION=$(node -p "JSON.parse(require('fs').readFileSync('package.json')).version")
+          fi
+          echo "Deploying version $VERSION to WordPress.org SVN..."
+
+          # Checkout SVN repository structure
+          svn checkout https://plugins.svn.wordpress.org/capo-head-optimizer svn-repo --depth immediacy --non-interactive --trust-server-cert
+          cd svn-repo
+          svn update trunk --set-depth infinity
+          svn update tags --set-depth empty
+
+          # Sync packaged files into trunk
+          unzip -q -o ../dist/capo.zip -d /tmp/unzipped
+          rm -rf trunk/*
+          cp -r /tmp/unzipped/capo/* trunk/
+          svn add --force trunk/* || true
+
+          # Create the version tag in SVN if it doesn't already exist
+          if ! svn info "https://plugins.svn.wordpress.org/capo-head-optimizer/tags/$VERSION" --non-interactive --trust-server-cert >/dev/null 2>&1; then
+            svn copy trunk "tags/$VERSION"
+          fi
+
+          # Commit to SVN
+          svn status
+          svn commit -m "Tag version $VERSION" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" --no-auth-cache --non-interactive
+
 
