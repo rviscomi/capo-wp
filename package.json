@@ -1,6 +1,6 @@
 {
   "name": "capo-wp-dev",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "Developer tooling and rule synchronization for Capo WordPress plugin",
   "type": "module",
@@ -13,7 +13,7 @@
     "build": "npm run sync-rules && npm run package"
   },
   "devDependencies": {
-    "@rviscomi/capo.js": "^2.2.1",
+    "@rviscomi/capo.js": "^2.3.0",
     "jsdom": "^30.0.1"
   }
 }

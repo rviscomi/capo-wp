@@ -3,7 +3,7 @@
  * Capo Rules Engine
  *
  * Implements the 1:1 classification rules and weight matrix from capo.js.
- * AUTO-GENERATED from @rviscomi/capo.js (v2.2.1).
+ * AUTO-GENERATED from @rviscomi/capo.js (v2.3.0).
  * DO NOT EDIT DIRECTLY. Run `npm run sync-rules` to regenerate.
  *
  * @package Capo
@@ -144,7 +144,7 @@ class Rules {
 	}
 
 	/**
-	 * Check if element is a preconnect link.
+	 * Check if element is a preconnect link or high-priority preload link.
 	 *
 	 * @param string $tag_name Tag name.
 	 * @param array  $attrs    Element attributes.
@@ -156,7 +156,28 @@ class Rules {
 		}
 
 		$rel = isset( $attrs['rel'] ) ? strtolower( trim( $attrs['rel'] ) ) : '';
-		return 'preconnect' === $rel;
+		return 'preconnect' === $rel || self::is_high_priority_preload( $tag_name, $attrs );
+	}
+
+	/**
+	 * Check if element is a high-priority preload link.
+	 *
+	 * @param string $tag_name Tag name.
+	 * @param array  $attrs    Element attributes.
+	 * @return bool
+	 */
+	public static function is_high_priority_preload( $tag_name, array $attrs ) {
+		if ( 'link' !== $tag_name ) {
+			return false;
+		}
+
+		$rel = isset( $attrs['rel'] ) ? strtolower( trim( $attrs['rel'] ) ) : '';
+		if ( 'preload' !== $rel && 'modulepreload' !== $rel ) {
+			return false;
+		}
+
+		$priority = isset( $attrs['fetchpriority'] ) ? strtolower( trim( $attrs['fetchpriority'] ) ) : '';
+		return 'high' === $priority;
 	}
 
 	/**

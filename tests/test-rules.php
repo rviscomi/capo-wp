@@ -101,9 +101,12 @@ class Capo_Rules_Test {
 	}
 
 	private static function test_preconnect_detection() {
-		echo "\nTesting Weight 8 (Preconnect)...\n";
+		echo "\nTesting Weight 8 (Preconnect / Critical Preload)...\n";
 		self::assert_weight( '<link rel="preconnect" href="https://fonts.googleapis.com">', 8, 'preconnect link' );
 		self::assert_weight( '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>', 8, 'preconnect with crossorigin' );
+		self::assert_weight( '<link rel="preload" href="/hero.webp" as="image" fetchpriority="high">', 8, 'preload with fetchpriority=high' );
+		self::assert_weight( '<link rel="modulepreload" href="/app.js" fetchpriority="high">', 8, 'modulepreload with fetchpriority=high' );
+		self::assert_weight( '<link rel="PRELOAD" href="/hero.webp" as="image" FETCHPRIORITY="HIGH">', 8, 'preload with fetchpriority=high case insensitive' );
 	}
 
 	private static function test_async_script_detection() {
@@ -134,6 +137,8 @@ class Capo_Rules_Test {
 		echo "\nTesting Weight 3 (Preload / Modulepreload)...\n";
 		self::assert_weight( '<link rel="preload" href="font.woff2" as="font" type="font/woff2" crossorigin>', 3, 'preload link' );
 		self::assert_weight( '<link rel="modulepreload" href="app.js">', 3, 'modulepreload link' );
+		self::assert_weight( '<link rel="preload" href="font.woff2" as="font" fetchpriority="low">', 3, 'preload link with fetchpriority=low' );
+		self::assert_weight( '<link rel="preload" href="font.woff2" as="font" fetchpriority="auto">', 3, 'preload link with fetchpriority=auto' );
 	}
 
 	private static function test_defer_script_detection() {

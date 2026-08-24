@@ -55,10 +55,13 @@ const testSnippets = [
   // Tier 9: Title
   '<title>My Awesome WordPress Site</title>',
 
-  // Tier 8: Preconnect
+  // Tier 8: Preconnect / Critical Resource Hints
   '<link rel="preconnect" href="https://fonts.googleapis.com">',
   '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>',
   '<link rel="PRECONNECT" href="https://cdn.example.com">',
+  '<link rel="preload" href="/hero.webp" as="image" fetchpriority="high">',
+  '<link rel="modulepreload" href="/app.js" fetchpriority="high">',
+  '<link rel="PRELOAD" href="/hero.webp" as="image" FETCHPRIORITY="HIGH">',
 
   // Tier 7: Async Script
   '<script src="/app.js" async></script>',
@@ -82,6 +85,8 @@ const testSnippets = [
   '<link rel="preload" href="/hero.webp" as="image">',
   '<link rel="modulepreload" href="/module.js">',
   '<link rel="PRELOAD" href="/font.woff2" as="font" crossorigin>',
+  '<link rel="preload" href="/font.woff2" as="font" fetchpriority="low">',
+  '<link rel="preload" href="/font.woff2" as="font" fetchpriority="auto">',
 
   // Tier 2: Defer Script
   '<script src="/main.js" defer></script>',

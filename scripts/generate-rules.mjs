@@ -192,7 +192,7 @@ ${keywordsList}
 	}
 
 	/**
-	 * Check if element is a preconnect link.
+	 * Check if element is a preconnect link or high-priority preload link.
 	 *
 	 * @param string $tag_name Tag name.
 	 * @param array  $attrs    Element attributes.
@@ -204,7 +204,28 @@ ${keywordsList}
 		}
 
 		$rel = isset( $attrs['rel'] ) ? strtolower( trim( $attrs['rel'] ) ) : '';
-		return 'preconnect' === $rel;
+		return 'preconnect' === $rel || self::is_high_priority_preload( $tag_name, $attrs );
+	}
+
+	/**
+	 * Check if element is a high-priority preload link.
+	 *
+	 * @param string $tag_name Tag name.
+	 * @param array  $attrs    Element attributes.
+	 * @return bool
+	 */
+	public static function is_high_priority_preload( $tag_name, array $attrs ) {
+		if ( 'link' !== $tag_name ) {
+			return false;
+		}
+
+		$rel = isset( $attrs['rel'] ) ? strtolower( trim( $attrs['rel'] ) ) : '';
+		if ( 'preload' !== $rel && 'modulepreload' !== $rel ) {
+			return false;
+		}
+
+		$priority = isset( $attrs['fetchpriority'] ) ? strtolower( trim( $attrs['fetchpriority'] ) ) : '';
+		return 'high' === $priority;
 	}
 
 	/**
