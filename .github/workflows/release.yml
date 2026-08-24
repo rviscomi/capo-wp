@@ -68,7 +68,7 @@ jobs:
           echo "Deploying version $VERSION to WordPress.org SVN..."
 
           # Checkout SVN repository structure
-          svn checkout https://plugins.svn.wordpress.org/capo-head-optimizer svn-repo --depth immediacy --non-interactive --trust-server-cert
+          svn checkout https://plugins.svn.wordpress.org/capo-head-optimizer svn-repo --depth immediates --non-interactive --trust-server-cert
           cd svn-repo
           svn update trunk --set-depth infinity
           svn update tags --set-depth empty
