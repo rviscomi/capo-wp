@@ -3,7 +3,7 @@
  * Capo Rules Engine
  *
  * Implements the 1:1 classification rules and weight matrix from capo.js.
- * AUTO-GENERATED from @rviscomi/capo.js (v2.3.0).
+ * AUTO-GENERATED from @rviscomi/capo.js (v2.3.1).
  * DO NOT EDIT DIRECTLY. Run `npm run sync-rules` to regenerate.
  *
  * @package Capo
